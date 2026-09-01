@@ -1,0 +1,13 @@
+{
+  "name": "artbyshahbaz",
+  "version": "1.0.0",
+  "description": "Art By Shahbaz - Bridal & Formal Wear website with Admin Panel (Node.js)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
