@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
@@ -11,9 +10,7 @@ interface ProductCardProps {
   whatsappPhone?: string;
 }
 
-export function ProductCard({ product, whatsappPhone }: ProductCardProps) {
-  const productUrl = `https://artbyshahbaz.com/products/${product.slug}`;
-
+export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group relative bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
       {/* Image */}
@@ -35,16 +32,6 @@ export function ProductCard({ product, whatsappPhone }: ProductCardProps) {
             </Badge>
           </div>
         )}
-        {/* Quick WhatsApp overlay on hover */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-          <WhatsAppButton
-            productName={product.name}
-            price={product.price}
-            productUrl={productUrl}
-            phoneNumber={whatsappPhone}
-            size="sm"
-          />
-        </div>
       </div>
 
       {/* Info */}

@@ -18,7 +18,7 @@ export default async function HomePage() {
   // Fall back to the most recent active products if nothing is flagged "Featured".
   const featured = (featuredOnly.length > 0 ? featuredOnly : activeProducts).slice(0, 6);
   const phone = social.whatsapp || settings.phone1 || "923001234567";
-  const heroBanner = banners[0];
+  const heroBanner = banners.find((b) => b.is_active ?? true) ?? banners[0];
 
   return (
     <div>
