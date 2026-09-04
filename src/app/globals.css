@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 25% 98%;
+    --foreground: 20 14% 10%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 10%;
+    
+    --primary: 44 68% 47%;
+    --primary-foreground: 40 25% 98%;
+    
+    --secondary: 40 20% 94%;
+    --secondary-foreground: 24 9.8% 10%;
+    
+    --muted: 40 20% 94%;
+    --muted-foreground: 25 5.3% 45%;
+    
+    --accent: 44 68% 47%;
+    --accent-foreground: 24 9.8% 10%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 44 68% 47%;
+    
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 20 14% 7%;
+    --foreground: 40 25% 96%;
+    
+    --card: 20 14% 10%;
+    --card-foreground: 40 25% 96%;
+    
+    --popover: 20 14% 10%;
+    --popover-foreground: 40 25% 96%;
+    
+    --primary: 44 68% 52%;
+    --primary-foreground: 20 14% 7%;
+    
+    --secondary: 20 10% 15%;
+    --secondary-foreground: 40 25% 96%;
+    
+    --muted: 20 10% 15%;
+    --muted-foreground: 40 10% 65%;
+    
+    --accent: 44 68% 52%;
+    --accent-foreground: 40 25% 96%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 40 25% 96%;
+    
+    --border: 20 10% 20%;
+    --input: 20 10% 20%;
+    --ring: 44 68% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-gold-500/20 selection:text-gold-900;
+  }
+}
+
+/* Custom Luxury Gradients & Accents */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #C9A227 0%, #E8D38D 50%, #A9851D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #C9A227 0%, #DFC58D 50%, #A9851D 100%);
+}
+
+.dark-luxury-bg {
+  background: linear-gradient(180deg, #161513 0%, #0D0C0B 100%);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass-nav {
+  background: rgba(18, 17, 16, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Luxury custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F4ECD9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C9A227;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A9851D;
+}
