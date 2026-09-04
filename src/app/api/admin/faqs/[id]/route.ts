@@ -6,10 +6,32 @@ export const dynamic = "force-dynamic";
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return NextResponse.json({ success: false, message: "Supabase not configured." }, { status: 503 });
-  const body = await req.json();
-  const { data, error } = await supabase.from("faqs").update({ ...body, updated_at: new Date().toISOString() }).eq("id", params.id).select().single();
-  if (error) return NextResponse.json({ success: false, message: error.message }, { status: 500 });
-  return NextResponse.json({ success: true, faq: data });
+
+  try {
+    const body = await req.json();
+    // `faqs` has no `updated_at` column — only patch real, editable fields.
+    const ALLOWED = ["question", "answer", "sort_order", "is_visible"] as const;
+    const patch: Record<string, unknown> = {};
+    for (const key of ALLOWED) {
+      if (key in body) patch[key] = body[key];
+    }
+
+    if (Object.keys(patch).length === 0) {
+      return NextResponse.json({ success: false, message: "Nothing to update." }, { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from("faqs")
+      .update(patch)
+      .eq("id", params.id)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, faq: data });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+  }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {

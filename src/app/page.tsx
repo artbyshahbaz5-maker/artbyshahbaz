@@ -5,11 +5,18 @@ import { ProductCard } from "@/components/ProductCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { MapPin, Phone, Clock, ChevronRight } from "lucide-react";
 
+// Always render fresh so new products / categories / FAQs added in the admin
+// panel appear immediately instead of being frozen at build time.
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const data = await getFullSiteData();
   const { settings, social, products, banners, reviews, faqs, categories } = data;
 
-  const featured = products.filter((p) => p.is_featured).slice(0, 6);
+  const activeProducts = products.filter((p) => p.is_active ?? true);
+  const featuredOnly = activeProducts.filter((p) => p.is_featured);
+  // Fall back to the most recent active products if nothing is flagged "Featured".
+  const featured = (featuredOnly.length > 0 ? featuredOnly : activeProducts).slice(0, 6);
   const phone = social.whatsapp || settings.phone1 || "923001234567";
   const heroBanner = banners[0];
 

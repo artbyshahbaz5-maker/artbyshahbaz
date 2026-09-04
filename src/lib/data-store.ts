@@ -103,47 +103,72 @@ export function getLocalFallbackData(): SiteData {
   };
 }
 
+// Run one Supabase select in isolation so a single failing table can never
+// wipe out every other section of the site. Errors are logged (visible in the
+// Vercel function logs) and that table falls back to an empty list.
+async function safeSelect<T>(
+  label: string,
+  builder: PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+): Promise<T[]> {
+  try {
+    const { data, error } = await builder;
+    if (error) {
+      console.error(`[data-store] "${label}" query failed: ${error.message}`);
+      return [];
+    }
+    return data ?? [];
+  } catch (err) {
+    console.error(`[data-store] "${label}" query threw:`, err);
+    return [];
+  }
+}
+
 export async function getFullSiteData(): Promise<SiteData> {
   const supabase = getSupabaseAdmin();
+
+  // Only fall back to bundled demo content when Supabase isn't configured at
+  // all. When it IS configured we return exactly what the database holds — even
+  // an empty list — so the admin panel's real state is what visitors see.
   if (!supabase) {
+    console.warn(
+      "[data-store] Supabase not configured (missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY) — serving demo data.",
+    );
     return getLocalFallbackData();
   }
 
-  try {
-    const [
-      { data: settingsData },
-      { data: socialData },
-      { data: categoriesData },
-      { data: productsData },
-      { data: galleryData },
-      { data: bannersData },
-      { data: reviewsData },
-      { data: faqsData },
-    ] = await Promise.all([
-      supabase.from("settings").select("*").maybeSingle(),
-      supabase.from("social_links").select("*").maybeSingle(),
-      supabase.from("categories").select("*").order("sort_order", { ascending: true }),
-      supabase.from("products").select("*, categories(name)").order("sort_order", { ascending: true }),
-      supabase.from("gallery").select("*").order("sort_order", { ascending: true }),
-      supabase.from("banners").select("*").order("sort_order", { ascending: true }),
-      supabase.from("reviews").select("*").order("sort_order", { ascending: true }),
-      supabase.from("faqs").select("*").order("sort_order", { ascending: true }),
-    ]);
+  const fallback = getLocalFallbackData();
 
-    const fallback = getLocalFallbackData();
+  const [
+    settingsRes,
+    socialRes,
+    categories,
+    products,
+    gallery,
+    banners,
+    reviews,
+    faqs,
+  ] = await Promise.all([
+    supabase.from("settings").select("*").order("updated_at", { ascending: false }).limit(1),
+    supabase.from("social_links").select("*").order("updated_at", { ascending: false }).limit(1),
+    safeSelect<Category>("categories", supabase.from("categories").select("*").order("sort_order", { ascending: true })),
+    safeSelect<Product>("products", supabase.from("products").select("*, categories(name)").order("sort_order", { ascending: true })),
+    safeSelect<GalleryItem>("gallery", supabase.from("gallery").select("*").order("sort_order", { ascending: true })),
+    safeSelect<Banner>("banners", supabase.from("banners").select("*").order("sort_order", { ascending: true })),
+    safeSelect<Review>("reviews", supabase.from("reviews").select("*").order("sort_order", { ascending: true })),
+    safeSelect<FAQ>("faqs", supabase.from("faqs").select("*").order("sort_order", { ascending: true })),
+  ]);
 
-    return {
-      settings: (settingsData as SiteSettings) || fallback.settings,
-      social: (socialData as SocialLinks) || fallback.social,
-      categories: (categoriesData && categoriesData.length > 0 ? (categoriesData as Category[]) : fallback.categories),
-      products: (productsData && productsData.length > 0 ? (productsData as Product[]) : fallback.products),
-      gallery: (galleryData && galleryData.length > 0 ? (galleryData as GalleryItem[]) : fallback.gallery),
-      banners: (bannersData && bannersData.length > 0 ? (bannersData as Banner[]) : fallback.banners),
-      reviews: (reviewsData && reviewsData.length > 0 ? (reviewsData as Review[]) : fallback.reviews),
-      faqs: (faqsData && faqsData.length > 0 ? (faqsData as FAQ[]) : fallback.faqs),
-    };
-  } catch (err) {
-    console.warn("Supabase fetch failed, using fallback data:", err);
-    return getLocalFallbackData();
-  }
+  if (settingsRes.error) console.error(`[data-store] "settings" query failed: ${settingsRes.error.message}`);
+  if (socialRes.error) console.error(`[data-store] "social_links" query failed: ${socialRes.error.message}`);
+
+  return {
+    settings: (settingsRes.data?.[0] as SiteSettings) || fallback.settings,
+    social: (socialRes.data?.[0] as SocialLinks) || fallback.social,
+    categories,
+    products,
+    gallery,
+    banners,
+    reviews,
+    faqs,
+  };
 }

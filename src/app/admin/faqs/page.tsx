@@ -22,6 +22,7 @@ export default function AdminFaqsPage() {
   async function load() {
     setLoading(true);
     const res = await fetch("/api/admin/faqs").then((r) => r.json());
+    if (!res.success) alert(res.message || "Failed to load FAQs.");
     setFaqs(res.faqs || []);
     setLoading(false);
   }
@@ -34,17 +35,32 @@ export default function AdminFaqsPage() {
   async function handleSave() {
     if (!editing.question || !editing.answer) return;
     setSaving(true);
-    if (isEdit && editing.id) {
-      await fetch(`/api/admin/faqs/${editing.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing) });
-    } else {
-      await fetch("/api/admin/faqs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing) });
+    try {
+      const payload = { question: editing.question, answer: editing.answer };
+      const res = await fetch(
+        isEdit && editing.id ? `/api/admin/faqs/${editing.id}` : "/api/admin/faqs",
+        {
+          method: isEdit && editing.id ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      ).then((r) => r.json());
+      if (!res.success) {
+        alert(res.message || "Failed to save FAQ.");
+        return;
+      }
+      setOpen(false);
+      load();
+    } finally {
+      setSaving(false);
     }
-    setSaving(false); setOpen(false); load();
   }
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this FAQ?")) return;
-    await fetch(`/api/admin/faqs/${id}`, { method: "DELETE" }); load();
+    const res = await fetch(`/api/admin/faqs/${id}`, { method: "DELETE" }).then((r) => r.json());
+    if (!res.success) alert(res.message || "Failed to delete FAQ.");
+    load();
   }
 
   return (
