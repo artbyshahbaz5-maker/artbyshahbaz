@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, X, Phone, Crown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Menu, X, Phone, Crown, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CartButton } from "@/components/cart/CartButton";
 
@@ -16,12 +16,31 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // `/api/admin/me` is gated by the admin auth middleware — a 200 means the
+  // current visitor has a valid admin session, so we surface a "Dashboard"
+  // shortcut. Anonymous visitors get a fast 401 (no Supabase round-trip).
+  useEffect(() => {
+    let active = true;
+    fetch("/api/admin/me", { cache: "no-store" })
+      .then((r) => {
+        if (active) setIsAdmin(r.ok);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 glass-nav border-b border-gold-200/40">
       {/* Announcement Bar */}
-      <div className="bg-gradient-to-r from-bridal-maroon via-bridal-ruby to-bridal-maroon text-white text-center py-2 text-xs tracking-widest uppercase font-medium">
-        ✨ Custom Bridal Fittings Available — Visit Shop #38, Kehkashan Arcade, Clifton &nbsp;|&nbsp;
+      <div className="bg-gradient-to-r from-bridal-maroon via-bridal-ruby to-bridal-maroon text-white text-center px-3 py-2 text-[10px] sm:text-xs tracking-widest uppercase font-medium">
+        <span className="hidden sm:inline">
+          ✨ Custom Bridal Fittings Available — Visit Shop #38, Kehkashan Arcade, Clifton &nbsp;|&nbsp;{" "}
+        </span>
+        <span className="sm:hidden">✨ Custom Bridal Fittings &nbsp;|&nbsp; </span>
         <a href="tel:+923001234567" className="underline underline-offset-2 hover:text-gold-200 transition-colors">
           Call Now
         </a>
@@ -58,6 +77,15 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-1.5 border border-gold-400 text-gold-700 hover:bg-gold-500 hover:text-white hover:border-gold-500 text-sm font-medium px-3.5 py-2 rounded-full transition-colors"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5" />
+                Dashboard
+              </Link>
+            )}
             <CartButton />
             <a
               href="https://wa.me/923001234567"
@@ -101,6 +129,16 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-gold-700 hover:text-gold-600 hover:bg-gold-50 rounded-md transition-colors"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
+            )}
             <a
               href="https://wa.me/923001234567"
               target="_blank"

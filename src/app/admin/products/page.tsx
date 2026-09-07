@@ -113,7 +113,7 @@ export default function AdminProductsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="font-serif text-2xl font-bold text-white">Products</h1>
           <p className="text-neutral-400 text-sm mt-1">{products.length} total outfits</p>
@@ -124,7 +124,7 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Search */}
-      <div className="relative mb-6 max-w-sm">
+      <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
         <Input
           placeholder="Search products..."

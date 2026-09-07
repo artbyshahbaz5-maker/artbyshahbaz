@@ -27,6 +27,7 @@ export interface Product {
 export interface GalleryItem {
   id: string;
   title?: string;
+  description?: string;
   image_url: string;
   category?: string;
   sort_order?: number;

@@ -85,7 +85,7 @@ export default function AdminCategoriesPage() {
   }
 
   return (
-    <div className="max-w-xl">
+    <div>
       <h1 className="font-serif text-2xl font-bold text-white mb-2">Categories</h1>
       <p className="text-neutral-400 text-sm mb-8">Manage product categories for your collections.</p>
 
@@ -108,9 +108,9 @@ export default function AdminCategoriesPage() {
           <Loader2 className="h-5 w-5 animate-spin" /> Loading...
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
           {categories.length === 0 && (
-            <p className="text-neutral-500 text-sm py-4">No categories yet. Add your first one above.</p>
+            <p className="text-neutral-500 text-sm py-4 col-span-full">No categories yet. Add your first one above.</p>
           )}
           {categories.map((cat) => (
             <div key={cat.id} className="flex items-center justify-between px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-neutral-700 transition-colors">

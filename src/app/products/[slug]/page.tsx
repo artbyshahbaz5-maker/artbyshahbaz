@@ -36,7 +36,7 @@ export default async function ProductDetailPage({
   params: { slug: string };
 }) {
   const data = await getFullSiteData();
-  const { products, settings, social } = data;
+  const { products, settings, social, faqs } = data;
   const product = products.find((p) => p.slug === params.slug);
 
   if (!product) {
@@ -44,6 +44,7 @@ export default async function ProductDetailPage({
   }
 
   const phone = social.whatsapp || settings.phone1 || "923001234567";
+  const productFaqs = faqs.filter((f) => f.is_visible ?? true).slice(0, 8);
   const related = products
     .filter((p) => p.id !== product.id && (product.category_id ? p.category_id === product.category_id : true))
     .slice(0, 4);
@@ -60,7 +61,7 @@ export default async function ProductDetailPage({
       </nav>
 
       {/* Main Product Showcase */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
         {/* Left: Images */}
         <div className="space-y-4">
           <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-neutral-100 shadow-md">
@@ -148,7 +149,7 @@ export default async function ProductDetailPage({
 
       {/* Related Products */}
       {related.length > 0 && (
-        <section className="border-t border-border pt-16">
+        <section className="border-t border-border pt-16 mb-16">
           <div className="text-center mb-10">
             <p className="text-gold-500 text-xs tracking-widest uppercase font-medium">You May Also Like</p>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold mt-1">Related Outfits</h2>
@@ -157,6 +158,54 @@ export default async function ProductDetailPage({
             {related.map((p) => (
               <ProductCard key={p.id} product={p} whatsappPhone={phone} />
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* FAQs */}
+      {productFaqs.length > 0 && (
+        <section className="border-t border-border pt-16">
+          <div className="grid lg:grid-cols-[1fr_2fr] gap-8 lg:gap-16">
+            <div className="lg:pt-2">
+              <p className="text-gold-500 text-xs tracking-widest uppercase font-medium">
+                Good to Know
+              </p>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold mt-1 leading-tight">
+                Frequently asked
+              </h2>
+              <p className="mt-4 max-w-xs text-sm text-muted-foreground leading-relaxed">
+                Sizing, custom orders and studio visits — the questions brides ask us most.
+              </p>
+              <a
+                href={`https://wa.me/${phone.replace(/[^0-9]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-gold-600 hover:text-gold-500 transition-colors"
+              >
+                Have another question? Message us
+              </a>
+            </div>
+
+            <div className="border-t border-border">
+              {productFaqs.map((faq) => (
+                <details key={faq.id} className="group border-b border-border">
+                  <summary className="flex items-start justify-between gap-4 py-5 cursor-pointer list-none">
+                    <span className="font-serif text-base sm:text-lg text-foreground transition-colors group-open:text-gold-700">
+                      {faq.question}
+                    </span>
+                    <span
+                      aria-hidden
+                      className="mt-1 flex-shrink-0 text-lg leading-none text-gold-500 transition-transform duration-200 group-open:rotate-45"
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <p className="max-w-[62ch] pb-6 pr-8 text-sm text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
       )}

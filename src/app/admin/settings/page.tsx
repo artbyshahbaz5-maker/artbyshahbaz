@@ -74,8 +74,8 @@ export default function AdminSettingsPage() {
   );
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center justify-between mb-8">
+    <div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="font-serif text-2xl font-bold text-white">Settings</h1>
           <p className="text-neutral-400 text-sm mt-1">Manage your shop info and contact details.</p>
@@ -86,7 +86,7 @@ export default function AdminSettingsPage() {
         </Button>
       </div>
 
-      <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6 items-start">
         {/* Shop Info */}
         <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 space-y-5">
           <h2 className="text-white font-semibold text-base mb-1">Shop Information</h2>
@@ -98,9 +98,14 @@ export default function AdminSettingsPage() {
               value={settings.description || ""}
               onChange={(e) => setSettings((p) => ({ ...p, description: e.target.value }))}
               className="bg-neutral-800 border-neutral-700 text-white"
-              rows={3}
+              rows={4}
             />
           </div>
+        </section>
+
+        {/* Contact & Location */}
+        <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 space-y-5">
+          <h2 className="text-white font-semibold text-base mb-1">Contact &amp; Location</h2>
           {field("Address", "address", "Shop #38, Kehkashan Arcade, Clifton, Karachi")}
           {field("Phone 1", "phone1", "+92 300 1234567")}
           {field("Phone 2 (optional)", "phone2")}
@@ -111,7 +116,7 @@ export default function AdminSettingsPage() {
 
         {/* Social Links */}
         <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 space-y-5">
-          <h2 className="text-white font-semibold text-base mb-1">Social & Contact Links</h2>
+          <h2 className="text-white font-semibold text-base mb-1">Social &amp; Contact Links</h2>
           {socialField("WhatsApp Number", "whatsapp", "923001234567")}
           {socialField("Instagram URL", "instagram", "https://instagram.com/artbyshahbaz")}
           {socialField("Facebook URL", "facebook", "https://facebook.com/artbyshahbaz")}

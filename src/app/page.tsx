@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getFullSiteData } from "@/lib/data-store";
-import { ProductCard } from "@/components/ProductCard";
+import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { MapPin, Phone, Clock, ChevronRight } from "lucide-react";
 
@@ -16,7 +16,11 @@ export default async function HomePage() {
   const activeProducts = products.filter((p) => p.is_active ?? true);
   const featuredOnly = activeProducts.filter((p) => p.is_featured);
   // Fall back to the most recent active products if nothing is flagged "Featured".
-  const featured = (featuredOnly.length > 0 ? featuredOnly : activeProducts).slice(0, 6);
+  // The full list is passed to <FeaturedProducts>, which shows 6 at a time with
+  // a "Show More" button.
+  const featured = featuredOnly.length > 0 ? featuredOnly : activeProducts;
+  const visibleReviews = reviews.filter((r) => r.is_visible ?? true);
+  const visibleFaqs = faqs.filter((f) => f.is_visible ?? true);
   const phone = social.whatsapp || settings.phone1 || "923001234567";
   const heroBanner = banners.find((b) => b.is_active ?? true) ?? banners[0];
 
@@ -97,12 +101,8 @@ export default async function HomePage() {
             </h2>
             <div className="w-16 h-0.5 bg-gold-400 mx-auto mt-4" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} whatsappPhone={phone} />
-            ))}
-          </div>
-          <div className="text-center mt-10">
+          <FeaturedProducts products={featured} phone={phone} />
+          <div className="text-center mt-6">
             <Link
               href="/products"
               className="inline-flex items-center gap-2 border border-gold-400 text-gold-600 hover:bg-gold-50 px-7 py-3 rounded-full text-sm font-medium transition-all"
@@ -176,7 +176,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── REVIEWS ── */}
-      {reviews.length > 0 && (
+      {visibleReviews.length > 0 && (
         <section className="bg-bridal-cream py-20 sm:py-28">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_2fr] gap-12 lg:gap-20">
             <div className="lg:pt-2">
@@ -197,23 +197,23 @@ export default async function HomePage() {
                   &ldquo;
                 </span>
                 <blockquote className="mt-4 font-serif text-xl sm:text-2xl italic leading-relaxed text-foreground/90">
-                  {reviews[0].review_text}
+                  {visibleReviews[0].review_text}
                 </blockquote>
                 <figcaption className="mt-5">
                   <span className="block text-sm font-semibold text-foreground">
-                    {reviews[0].client_name}
+                    {visibleReviews[0].client_name}
                   </span>
-                  {reviews[0].event_type && (
+                  {visibleReviews[0].event_type && (
                     <span className="mt-0.5 block text-xs text-gold-600">
-                      {reviews[0].event_type}
+                      {visibleReviews[0].event_type}
                     </span>
                   )}
                 </figcaption>
               </figure>
 
-              {reviews.length > 1 && (
+              {visibleReviews.length > 1 && (
                 <div className="mt-12 grid gap-x-10 gap-y-10 border-t border-gold-300/50 pt-10 sm:grid-cols-2">
-                  {reviews.slice(1, 5).map((review) => (
+                  {visibleReviews.slice(1, 5).map((review) => (
                     <div key={review.id}>
                       <p className="text-sm leading-relaxed text-foreground/75">
                         {review.review_text}
@@ -234,7 +234,7 @@ export default async function HomePage() {
       )}
 
       {/* ── FAQs ── */}
-      {faqs.length > 0 && (
+      {visibleFaqs.length > 0 && (
         <section className="py-20 sm:py-28">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_2fr] gap-12 lg:gap-20">
             <div className="lg:pt-2">
@@ -256,7 +256,7 @@ export default async function HomePage() {
             </div>
 
             <div className="border-t border-border">
-              {faqs.slice(0, 8).map((faq) => (
+              {visibleFaqs.slice(0, 8).map((faq) => (
                 <details key={faq.id} className="group border-b border-border">
                   <summary className="flex items-start justify-between gap-4 py-5 cursor-pointer list-none">
                     <span className="font-serif text-base sm:text-lg text-foreground transition-colors group-open:text-gold-700">

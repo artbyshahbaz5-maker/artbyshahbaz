@@ -36,11 +36,15 @@ CREATE TABLE IF NOT EXISTS public.products (
 CREATE TABLE IF NOT EXISTS public.gallery (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT,
+    description TEXT,
     image_url TEXT NOT NULL,
     category TEXT DEFAULT 'Bridal',
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Incremental: add description to an already-created gallery table (safe to re-run).
+ALTER TABLE public.gallery ADD COLUMN IF NOT EXISTS description TEXT;
 
 -- 5. Banners Table
 CREATE TABLE IF NOT EXISTS public.banners (
