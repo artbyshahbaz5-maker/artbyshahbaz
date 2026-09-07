@@ -9,7 +9,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
   try {
     const body = await req.json();
-    const ALLOWED = ["title", "image_url", "category", "sort_order"] as const;
+    const ALLOWED = ["title", "description", "image_url", "category", "sort_order"] as const;
     const patch: Record<string, unknown> = {};
     for (const key of ALLOWED) {
       if (key in body) patch[key] = body[key];

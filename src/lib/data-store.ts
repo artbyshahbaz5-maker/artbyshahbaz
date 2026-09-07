@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { unstable_noStore as noStore } from "next/cache";
 import { getSupabaseAdmin } from "./supabase/admin";
 import type { SiteData, Product, Category, GalleryItem, Banner, Review, FAQ, SiteSettings, SocialLinks } from "@/types";
 
@@ -123,7 +124,50 @@ async function safeSelect<T>(
   }
 }
 
+// Fetch products, flattening the joined category name onto `category_name` so
+// the storefront can render the label. If the PostgREST embed fails (a missing
+// or renamed foreign key), retry with a plain select so products still load
+// instead of the whole listing silently going blank.
+async function fetchProducts(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+): Promise<Product[]> {
+  let res = await supabase
+    .from("products")
+    .select("*, categories(name)")
+    .order("sort_order", { ascending: true });
+
+  if (res.error) {
+    console.error(
+      `[data-store] products category embed failed (${res.error.message}); retrying without join`,
+    );
+    res = await supabase
+      .from("products")
+      .select("*")
+      .order("sort_order", { ascending: true });
+  }
+
+  if (res.error) {
+    console.error(`[data-store] "products" query failed: ${res.error.message}`);
+    return [];
+  }
+
+  return (res.data ?? []).map((row: Record<string, unknown>) => {
+    const { categories, ...rest } = row as { categories?: { name?: string } | null };
+    return {
+      ...(rest as unknown as Product),
+      category_name:
+        categories?.name ?? (row.category_name as string | undefined) ?? undefined,
+    };
+  });
+}
+
 export async function getFullSiteData(): Promise<SiteData> {
+  // Belt-and-suspenders against Next.js's data cache: some deployments were
+  // showing stale content even with `dynamic = "force-dynamic"` because the
+  // Supabase client's fetch was still being cached. This opts every render that
+  // reads site data out of caching entirely.
+  noStore();
+
   const supabase = getSupabaseAdmin();
 
   // Only fall back to bundled demo content when Supabase isn't configured at
@@ -151,7 +195,7 @@ export async function getFullSiteData(): Promise<SiteData> {
     supabase.from("settings").select("*").order("updated_at", { ascending: false }).limit(1),
     supabase.from("social_links").select("*").order("updated_at", { ascending: false }).limit(1),
     safeSelect<Category>("categories", supabase.from("categories").select("*").order("sort_order", { ascending: true })),
-    safeSelect<Product>("products", supabase.from("products").select("*, categories(name)").order("sort_order", { ascending: true })),
+    fetchProducts(supabase),
     safeSelect<GalleryItem>("gallery", supabase.from("gallery").select("*").order("sort_order", { ascending: true })),
     safeSelect<Banner>("banners", supabase.from("banners").select("*").order("sort_order", { ascending: true })),
     safeSelect<Review>("reviews", supabase.from("reviews").select("*").order("sort_order", { ascending: true })),

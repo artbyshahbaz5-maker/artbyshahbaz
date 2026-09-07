@@ -14,7 +14,11 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group relative bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
       {/* Image */}
-      <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden">
+      <Link
+        href={`/products/${product.slug}`}
+        className="relative block aspect-[3/4] bg-neutral-100 overflow-hidden"
+        aria-label={`View ${product.name}`}
+      >
         <Image
           src={
             product.image_url ||
@@ -32,7 +36,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </Badge>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Info */}
       <div className="p-4">

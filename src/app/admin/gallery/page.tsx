@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Upload, Loader2, Pencil } from "lucide-react";
 import type { GalleryItem } from "@/types";
 
@@ -16,6 +17,7 @@ export default function AdminGalleryPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState("");
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -36,6 +38,7 @@ export default function AdminGalleryPage() {
     setEditingId(null);
     setImageUrl("");
     setTitle("");
+    setDescription("");
     setOpen(true);
   }
 
@@ -43,6 +46,7 @@ export default function AdminGalleryPage() {
     setEditingId(item.id);
     setImageUrl(item.image_url);
     setTitle(item.title || "");
+    setDescription(item.description || "");
     setOpen(true);
   }
 
@@ -68,7 +72,7 @@ export default function AdminGalleryPage() {
         {
           method: isEdit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image_url: imageUrl, title }),
+          body: JSON.stringify({ image_url: imageUrl, title, description }),
         },
       ).then((r) => r.json());
       if (!res.success) {
@@ -79,6 +83,7 @@ export default function AdminGalleryPage() {
       setEditingId(null);
       setImageUrl("");
       setTitle("");
+      setDescription("");
       load();
     } finally {
       setSaving(false);
@@ -94,7 +99,7 @@ export default function AdminGalleryPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="font-serif text-2xl font-bold text-white">Gallery</h1>
           <p className="text-neutral-400 text-sm mt-1">{gallery.length} photos</p>
@@ -156,6 +161,10 @@ export default function AdminGalleryPage() {
             <div className="space-y-1.5">
               <Label className="text-neutral-300">Caption (optional)</Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Bridal Lehenga – 2024" className="bg-neutral-800 border-neutral-700 text-white" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-neutral-300">Description (optional)</Label>
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Fabric, embellishment, occasion — shown on hover in the gallery." className="bg-neutral-800 border-neutral-700 text-white" />
             </div>
             <div className="flex gap-3">
               <Button onClick={handleSave} disabled={saving || !imageUrl} className="flex-1 bg-gold-500 hover:bg-gold-400 text-neutral-950 font-semibold">
