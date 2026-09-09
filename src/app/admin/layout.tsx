@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  Crown, LayoutDashboard, Package, Images, Layers,
+  LayoutDashboard, Package, Images, Layers,
   Star, HelpCircle, Settings, LogOut, ExternalLink, Image, Menu, X,
 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const NAV = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -24,11 +25,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  // Reflect the admin-managed logo in the sidebar. Cheap, admin-only fetch.
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((d) => setLogoUrl(d?.settings?.logo_url || null))
+      .catch(() => {});
+  }, []);
 
   async function handleLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -43,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between h-14 px-4 bg-neutral-900 border-b border-neutral-800">
         <Link href="/admin" className="flex items-center gap-2">
-          <Crown className="h-5 w-5 text-gold-400" />
+          <Logo logoUrl={logoUrl} className="h-7 w-7 rounded" />
           <span className="text-white text-sm font-bold font-serif">Art By Shahbaz</span>
         </Link>
         <div className="flex items-center gap-1">
@@ -83,7 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         <div className="p-5 border-b border-neutral-800 flex items-center justify-between">
           <Link href="/admin" className="flex items-center gap-2.5">
-            <Crown className="h-5 w-5 text-gold-400" />
+            <Logo logoUrl={logoUrl} className="h-8 w-8 rounded" />
             <div>
               <p className="text-white text-sm font-bold font-serif">Art By Shahbaz</p>
               <p className="text-[10px] text-gold-400/70 tracking-widest uppercase">Admin</p>

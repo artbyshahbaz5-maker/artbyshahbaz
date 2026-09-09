@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@artbyshahbaz.com"
+                placeholder="johndoe@example.com"
                 required
                 className="bg-neutral-800 border-neutral-700 text-white placeholder:text-neutral-500 focus-visible:ring-gold-500"
               />

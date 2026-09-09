@@ -161,6 +161,26 @@ async function fetchProducts(
   });
 }
 
+// Lightweight lookup for just the brand logo — used by the root layout so the
+// storefront navbar can show an admin-managed logo without pulling the whole
+// site payload on every render.
+export async function getLogoUrl(): Promise<string | null> {
+  noStore();
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+  try {
+    const { data } = await supabase
+      .from("settings")
+      .select("logo_url")
+      .order("updated_at", { ascending: false })
+      .limit(1);
+    return (data?.[0]?.logo_url as string | null) || null;
+  } catch (err) {
+    console.error("[data-store] getLogoUrl failed:", err);
+    return null;
+  }
+}
+
 export async function getFullSiteData(): Promise<SiteData> {
   // Belt-and-suspenders against Next.js's data cache: some deployments were
   // showing stale content even with `dynamic = "force-dynamic"` because the

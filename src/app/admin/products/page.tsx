@@ -13,7 +13,7 @@ import { Plus, Pencil, Trash2, Upload, Loader2, Search } from "lucide-react";
 import type { Product, Category } from "@/types";
 
 const EMPTY: Partial<Product> = {
-  name: "", description: "", price: "", image_url: "",
+  name: "", description: "", price: "", image_url: "", gallery_urls: [],
   category_id: "", is_featured: false, is_active: true, sort_order: 0,
 };
 
@@ -26,8 +26,10 @@ export default function AdminProductsPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [galleryUploading, setGalleryUploading] = useState(false);
   const [search, setSearch] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
@@ -55,6 +57,43 @@ export default function AdminProductsPage() {
     const res = await fetch("/api/admin/upload", { method: "POST", body: fd }).then((r) => r.json());
     if (res.success) setEditing((prev) => ({ ...prev, image_url: res.url }));
     setUploading(false);
+  }
+
+  // Upload one or more extra photos for the product gallery. Each file is sent
+  // through the same upload endpoint; successful URLs are appended to
+  // `gallery_urls`. The main image flow above is untouched.
+  async function handleGalleryUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    setGalleryUploading(true);
+    const uploaded: string[] = [];
+    for (const file of files) {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", "products");
+      try {
+        const res = await fetch("/api/admin/upload", { method: "POST", body: fd }).then((r) => r.json());
+        if (res.success && res.url) uploaded.push(res.url);
+        else alert(res?.message || `Failed to upload ${file.name}.`);
+      } catch (err: any) {
+        alert(err?.message || `Failed to upload ${file.name}.`);
+      }
+    }
+    if (uploaded.length) {
+      setEditing((prev) => ({
+        ...prev,
+        gallery_urls: [...(prev.gallery_urls ?? []), ...uploaded],
+      }));
+    }
+    setGalleryUploading(false);
+    if (galleryRef.current) galleryRef.current.value = "";
+  }
+
+  function removeGalleryImage(url: string) {
+    setEditing((prev) => ({
+      ...prev,
+      gallery_urls: (prev.gallery_urls ?? []).filter((u) => u !== url),
+    }));
   }
 
   async function handleSave() {
@@ -215,6 +254,33 @@ export default function AdminProductsPage() {
               <Button type="button" variant="adminSecondary" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading} className="gap-2">
                 {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                 {uploading ? "Uploading..." : "Upload Image"}
+              </Button>
+            </div>
+            {/* Gallery Images (multiple) */}
+            <div className="space-y-2">
+              <Label className="text-neutral-300">Gallery Images</Label>
+              <p className="text-xs text-neutral-500">Optional extra photos shown alongside the main image.</p>
+              {(editing.gallery_urls?.length ?? 0) > 0 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {editing.gallery_urls!.map((url) => (
+                    <div key={url} className="relative aspect-square rounded-lg overflow-hidden border border-neutral-700 group">
+                      <Image src={url} alt="Gallery image" fill className="object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(url)}
+                        aria-label="Remove image"
+                        className="absolute top-1 right-1 p-1 rounded-full bg-black/70 text-white hover:bg-red-600 transition-colors"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <input type="file" accept="image/*" multiple ref={galleryRef} onChange={handleGalleryUpload} className="hidden" />
+              <Button type="button" variant="adminSecondary" size="sm" onClick={() => galleryRef.current?.click()} disabled={galleryUploading} className="gap-2">
+                {galleryUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                {galleryUploading ? "Uploading..." : "Add Gallery Images"}
               </Button>
             </div>
             {/* Toggles */}

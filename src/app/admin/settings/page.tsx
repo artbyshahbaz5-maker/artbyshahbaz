@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Upload, Trash2, KeyRound } from "lucide-react";
 import type { SiteSettings, SocialLinks } from "@/types";
 
 export default function AdminSettingsPage() {
@@ -14,6 +15,12 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoRef = useRef<HTMLInputElement>(null);
+
+  const [pw, setPw] = useState({ currentPassword: "", newPassword: "", confirm: "" });
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -41,6 +48,60 @@ export default function AdminSettingsPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("folder", "branding");
+    const res = await fetch("/api/admin/upload", { method: "POST", body: fd }).then((r) => r.json());
+    if (res.success && res.url) {
+      setSettings((p) => ({ ...p, logo_url: res.url }));
+    } else {
+      alert(res?.message || "Logo upload failed.");
+    }
+    setLogoUploading(false);
+    if (logoRef.current) logoRef.current.value = "";
+  }
+
+  function removeLogo() {
+    setSettings((p) => ({ ...p, logo_url: "" }));
+  }
+
+  async function handlePasswordUpdate() {
+    setPwMsg(null);
+    if (pw.newPassword.length < 8) {
+      setPwMsg({ ok: false, text: "New password must be at least 8 characters." });
+      return;
+    }
+    if (pw.newPassword !== pw.confirm) {
+      setPwMsg({ ok: false, text: "New password and confirmation do not match." });
+      return;
+    }
+    setPwSaving(true);
+    try {
+      const res = await fetch("/api/admin/account/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: pw.currentPassword,
+          newPassword: pw.newPassword,
+        }),
+      }).then((r) => r.json());
+      if (res.success) {
+        setPwMsg({ ok: true, text: "Password updated." });
+        setPw({ currentPassword: "", newPassword: "", confirm: "" });
+      } else {
+        setPwMsg({ ok: false, text: res.message || "Failed to update password." });
+      }
+    } catch (err: any) {
+      setPwMsg({ ok: false, text: err?.message || "Failed to update password." });
+    } finally {
+      setPwSaving(false);
+    }
   }
 
   if (loading) return (
@@ -122,6 +183,104 @@ export default function AdminSettingsPage() {
           {socialField("Facebook URL", "facebook", "https://facebook.com/artbyshahbaz")}
           {socialField("YouTube URL", "youtube")}
           {socialField("TikTok URL", "tiktok")}
+        </section>
+
+        {/* Branding / Logo */}
+        <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 space-y-4">
+          <h2 className="text-white font-semibold text-base mb-1">Branding</h2>
+          <p className="text-neutral-400 text-xs">
+            Shown in the site header, footer and admin panel. Leave empty to use the default logo.
+          </p>
+          <div className="flex items-center gap-4">
+            <div className="relative h-20 w-20 rounded-lg overflow-hidden border border-neutral-700 bg-neutral-800 shrink-0">
+              <Image
+                src={settings.logo_url && settings.logo_url.trim() !== "" ? settings.logo_url : "/logo.jpg"}
+                alt="Current logo"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <input type="file" accept="image/*" ref={logoRef} onChange={handleLogoUpload} className="hidden" />
+              <Button
+                type="button"
+                variant="adminSecondary"
+                size="sm"
+                onClick={() => logoRef.current?.click()}
+                disabled={logoUploading}
+                className="gap-2"
+              >
+                {logoUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                {logoUploading ? "Uploading..." : "Upload New Logo"}
+              </Button>
+              {settings.logo_url && settings.logo_url.trim() !== "" && (
+                <Button
+                  type="button"
+                  variant="adminSecondary"
+                  size="sm"
+                  onClick={removeLogo}
+                  className="gap-2 border-red-800/60 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Reset to default
+                </Button>
+              )}
+            </div>
+          </div>
+          <p className="text-neutral-500 text-xs">Click “Save Changes” above to apply logo updates.</p>
+        </section>
+      </div>
+
+      {/* Account / Password */}
+      <div className="mt-6">
+        <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 space-y-5 max-w-md">
+          <div className="flex items-center gap-2">
+            <KeyRound className="h-4 w-4 text-gold-400" />
+            <h2 className="text-white font-semibold text-base">Admin Account</h2>
+          </div>
+          <p className="text-neutral-400 text-xs">
+            Change the password for the admin account you are signed in with.
+          </p>
+          <div className="space-y-1.5">
+            <Label className="text-neutral-300">Current Password</Label>
+            <Input
+              type="password"
+              value={pw.currentPassword}
+              onChange={(e) => setPw((p) => ({ ...p, currentPassword: e.target.value }))}
+              className="bg-neutral-800 border-neutral-700 text-white"
+              autoComplete="current-password"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-neutral-300">New Password</Label>
+            <Input
+              type="password"
+              value={pw.newPassword}
+              onChange={(e) => setPw((p) => ({ ...p, newPassword: e.target.value }))}
+              className="bg-neutral-800 border-neutral-700 text-white"
+              autoComplete="new-password"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-neutral-300">Confirm New Password</Label>
+            <Input
+              type="password"
+              value={pw.confirm}
+              onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))}
+              className="bg-neutral-800 border-neutral-700 text-white"
+              autoComplete="new-password"
+            />
+          </div>
+          {pwMsg && (
+            <p className={pwMsg.ok ? "text-sm text-green-400" : "text-sm text-red-400"}>{pwMsg.text}</p>
+          )}
+          <Button
+            onClick={handlePasswordUpdate}
+            disabled={pwSaving || !pw.currentPassword || !pw.newPassword || !pw.confirm}
+            className="bg-gold-500 hover:bg-gold-400 text-neutral-950 font-semibold gap-2"
+          >
+            {pwSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+            Update Password
+          </Button>
         </section>
       </div>
     </div>
