@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { Crown, MapPin, Phone, Clock } from "lucide-react";
+import { MapPin, Phone, Clock } from "lucide-react";
 import { getFullSiteData } from "@/lib/data-store";
+import { Logo } from "@/components/Logo";
+import { AdminOnly } from "@/components/AdminOnly";
 
 // Brand icons — lucide-react no longer ships these, so keep them as small
 // inline SVGs. `stroke="currentColor"` (a real SVG attribute, not the invalid
@@ -54,8 +56,8 @@ export async function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <Link href="/" className="flex items-center gap-2 mb-4 group">
-            <Crown className="h-6 w-6 text-gold-400" />
+          <Link href="/" className="flex items-center gap-2.5 mb-4 group">
+            <Logo logoUrl={settings.logo_url} className="h-10 w-10 rounded-md bg-white/5" />
             <div>
               <span className="font-serif text-lg font-bold text-white">Art By Shahbaz</span>
               <span className="block text-[10px] text-gold-400/70 tracking-[0.25em] uppercase -mt-0.5">
@@ -97,7 +99,6 @@ export async function Footer() {
               { label: "Bridal Gallery", href: "/gallery" },
               { label: "About Atelier", href: "/about" },
               { label: "Contact & Booking", href: "/contact" },
-              { label: "Admin Portal", href: "/admin/login" },
             ].map(({ label, href }) => (
               <li key={href}>
                 <Link
@@ -108,6 +109,17 @@ export async function Footer() {
                 </Link>
               </li>
             ))}
+            {/* Only rendered for a logged-in admin — never sent to the public. */}
+            <AdminOnly>
+              <li>
+                <Link
+                  href="/admin"
+                  className="text-sm text-gold-400/90 hover:text-gold-300 transition-colors"
+                >
+                  Admin Portal
+                </Link>
+              </li>
+            </AdminOnly>
           </ul>
         </div>
 

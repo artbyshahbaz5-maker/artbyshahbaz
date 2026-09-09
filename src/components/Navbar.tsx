@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Menu, X, Phone, Crown, LayoutDashboard } from "lucide-react";
+import { Menu, X, Phone, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CartButton } from "@/components/cart/CartButton";
+import { Logo } from "@/components/Logo";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -14,7 +15,7 @@ const NAV_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
-export function Navbar() {
+export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -49,8 +50,8 @@ export function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <Crown className="h-6 w-6 text-gold-500 group-hover:text-gold-400 transition-colors" />
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <Logo logoUrl={logoUrl} priority className="h-10 w-10 rounded-md" />
             <div>
               <span className="font-serif text-xl font-bold tracking-wide text-foreground group-hover:text-gold-600 transition-colors">
                 Art By Shahbaz
@@ -73,6 +74,16 @@ export function Navbar() {
                 <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gold-500 transition-all group-hover:w-full" />
               </Link>
             ))}
+            {/* Admin-only — surfaced after the `/api/admin/me` check below. */}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-sm font-medium text-gold-600 hover:text-gold-500 transition-colors tracking-wide relative group"
+              >
+                Admin
+                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gold-500 transition-all group-hover:w-full" />
+              </Link>
+            )}
           </div>
 
           {/* Desktop CTA */}

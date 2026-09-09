@@ -15,10 +15,14 @@ export default async function HomePage() {
 
   const activeProducts = products.filter((p) => p.is_active ?? true);
   const featuredOnly = activeProducts.filter((p) => p.is_featured);
-  // Fall back to the most recent active products if nothing is flagged "Featured".
-  // The full list is passed to <FeaturedProducts>, which shows 6 at a time with
-  // a "Show More" button.
-  const featured = featuredOnly.length > 0 ? featuredOnly : activeProducts;
+  // Featured products come first, then the rest of the active catalogue fills in
+  // behind them. <FeaturedProducts> shows 6 at a time with a "Show More" button
+  // (and no button when there are 6 or fewer), so the home grid always offers a
+  // full first row regardless of how many products carry the "Featured" flag.
+  const featured = [
+    ...featuredOnly,
+    ...activeProducts.filter((p) => !featuredOnly.some((f) => f.id === p.id)),
+  ];
   const visibleReviews = reviews.filter((r) => r.is_visible ?? true);
   const visibleFaqs = faqs.filter((f) => f.is_visible ?? true);
   const phone = social.whatsapp || settings.phone1 || "923001234567";

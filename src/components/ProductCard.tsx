@@ -1,9 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { ProductCardGallery } from "@/components/ProductCardGallery";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
+
+const PLACEHOLDER_IMAGE =
+  "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800&auto=format&fit=crop";
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +14,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const images = [product.image_url, ...(product.gallery_urls ?? [])]
+    .map((u) => (u ?? "").trim())
+    .filter(Boolean);
+  if (images.length === 0) images.push(PLACEHOLDER_IMAGE);
+
   return (
     <div className="group relative bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
       {/* Image */}
@@ -19,18 +27,9 @@ export function ProductCard({ product }: ProductCardProps) {
         className="relative block aspect-[3/4] bg-neutral-100 overflow-hidden"
         aria-label={`View ${product.name}`}
       >
-        <Image
-          src={
-            product.image_url ||
-            "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800&auto=format&fit=crop"
-          }
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        <ProductCardGallery images={images} alt={product.name} />
         {product.is_featured && (
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 z-10">
             <Badge variant="gold" className="text-xs font-medium shadow">
               ✦ Featured
             </Badge>
