@@ -22,11 +22,6 @@ export interface CartItem {
 
 type AddableProduct = Pick<Product, "id" | "name" | "slug" | "price" | "image_url">;
 
-interface CartToast {
-  message: string;
-  id: number;
-}
-
 interface CartContextValue {
   items: CartItem[];
   count: number;
@@ -37,8 +32,6 @@ interface CartContextValue {
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  toast: CartToast | null;
-  clearToast: () => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -61,7 +54,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [toast, setToast] = useState<CartToast | null>(null);
 
   // Load persisted cart once on mount.
   useEffect(() => {
@@ -117,8 +109,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         },
       ];
     });
-    // Lightweight confirmation instead of forcing the whole cart drawer open.
-    setToast({ message: `${product.name} added to cart`, id: Date.now() });
+    setIsOpen(true);
   }, []);
 
   const removeItem = useCallback((id: string) => {
@@ -137,12 +128,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clear = useCallback(() => setItems([]), []);
-  const openCart = useCallback(() => {
-    setToast(null);
-    setIsOpen(true);
-  }, []);
+  const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
-  const clearToast = useCallback(() => setToast(null), []);
 
   const count = useMemo(
     () => items.reduce((n, i) => n + i.qty, 0),
@@ -160,10 +147,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       isOpen,
       openCart,
       closeCart,
-      toast,
-      clearToast,
     }),
-    [items, count, addItem, removeItem, setQty, clear, isOpen, openCart, closeCart, toast, clearToast]
+    [items, count, addItem, removeItem, setQty, clear, isOpen, openCart, closeCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

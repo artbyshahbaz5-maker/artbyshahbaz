@@ -1,6 +1,5 @@
 import { getFullSiteData } from "@/lib/data-store";
 import { CartDrawer } from "./CartDrawer";
-import { CartToast } from "./CartToast";
 
 // Server component: resolves the store's WhatsApp number from site settings
 // (admin-controlled) and hands it to the client-side cart drawer.
@@ -12,10 +11,5 @@ export async function CartMount() {
   } catch {
     /* fall back to the default number */
   }
-  return (
-    <>
-      <CartDrawer phone={phone} />
-      <CartToast />
-    </>
-  );
+  return <CartDrawer phone={phone} />;
 }
