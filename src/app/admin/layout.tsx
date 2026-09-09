@@ -6,9 +6,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Package, Images, Layers,
-  Star, HelpCircle, Settings, LogOut, ExternalLink, Image, Menu, X,
+  Star, HelpCircle, Settings, LogOut, Image, Menu, X,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const NAV = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -26,6 +30,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
@@ -41,6 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   async function handleLogout() {
+    setLoggingOut(true);
     await fetch("/api/admin/logout", { method: "POST" });
     router.push("/admin/login");
     router.refresh();
@@ -58,7 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Link>
         <div className="flex items-center gap-1">
           <button
-            onClick={handleLogout}
+            onClick={() => setConfirmOpen(true)}
             aria-label="Sign out"
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-colors"
           >
@@ -130,17 +137,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="p-3 border-t border-neutral-800 space-y-1">
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-            View Live Site
-          </a>
           <button
-            onClick={handleLogout}
+            onClick={() => setConfirmOpen(true)}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-400 border border-red-900/40 hover:text-red-300 hover:bg-red-950/30 transition-colors"
           >
             <LogOut className="h-4 w-4" />
@@ -153,6 +151,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="flex-1 min-w-0 overflow-auto">
         <div className="p-4 sm:p-6 lg:p-8">{children}</div>
       </main>
+
+      {/* Sign-out confirmation */}
+      <Dialog open={confirmOpen} onOpenChange={(o) => !loggingOut && setConfirmOpen(o)}>
+        <DialogContent className="max-w-sm bg-neutral-900 border-neutral-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">Sign out?</DialogTitle>
+            <DialogDescription className="text-neutral-400">
+              You will need to sign in again to access the admin panel.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="adminSecondary"
+              onClick={() => setConfirmOpen(false)}
+              disabled={loggingOut}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="bg-red-600 hover:bg-red-500 text-white font-semibold gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              {loggingOut ? "Signing out..." : "Sign Out"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
