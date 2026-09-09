@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Outfit } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { CartProvider } from "@/context/CartContext";
-import { CartMount } from "@/components/cart/CartMount";
-import { getLogoUrl } from "@/lib/data-store";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -53,22 +48,17 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://artbyshahbaz.com"),
 };
 
-export default async function RootLayout({
+// Root layout stays minimal: the storefront chrome (navbar, footer, cart) lives
+// in the (site) route group so it never wraps the admin panel or API routes.
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const logoUrl = await getLogoUrl();
-
   return (
     <html lang="en" className={`${playfair.variable} ${outfit.variable}`}>
       <body className="font-sans bg-background text-foreground min-h-screen flex flex-col">
-        <CartProvider>
-          <Navbar logoUrl={logoUrl} />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <CartMount />
-        </CartProvider>
+        {children}
       </body>
     </html>
   );
