@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MapPin, Phone, Clock } from "lucide-react";
 import { getFullSiteData } from "@/lib/data-store";
 import { Logo } from "@/components/Logo";
+import { AdminOnly } from "@/components/AdminOnly";
 
 // Brand icons — lucide-react no longer ships these, so keep them as small
 // inline SVGs. `stroke="currentColor"` (a real SVG attribute, not the invalid
@@ -108,6 +109,17 @@ export async function Footer() {
                 </Link>
               </li>
             ))}
+            {/* Only rendered for a logged-in admin — never sent to the public. */}
+            <AdminOnly>
+              <li>
+                <Link
+                  href="/admin"
+                  className="text-sm text-gold-400/90 hover:text-gold-300 transition-colors"
+                >
+                  Admin Portal
+                </Link>
+              </li>
+            </AdminOnly>
           </ul>
         </div>
 

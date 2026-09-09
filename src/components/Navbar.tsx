@@ -74,6 +74,16 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
                 <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gold-500 transition-all group-hover:w-full" />
               </Link>
             ))}
+            {/* Admin-only — surfaced after the `/api/admin/me` check below. */}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="text-sm font-medium text-gold-600 hover:text-gold-500 transition-colors tracking-wide relative group"
+              >
+                Admin
+                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-gold-500 transition-all group-hover:w-full" />
+              </Link>
+            )}
           </div>
 
           {/* Desktop CTA */}
