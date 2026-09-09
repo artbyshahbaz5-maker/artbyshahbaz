@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Package, Images, Layers,
-  Star, HelpCircle, Settings, LogOut, Image, Menu, X,
+  Star, HelpCircle, Settings, LogOut, ExternalLink, Image, Menu, X,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import {
@@ -64,6 +64,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span className="text-white text-sm font-bold font-serif">Art By Shahbaz</span>
         </Link>
         <div className="flex items-center gap-1">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View site"
+            className="p-2 rounded-md text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
           <button
             onClick={() => setConfirmOpen(true)}
             aria-label="Sign out"
@@ -137,6 +146,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="p-3 border-t border-neutral-800 space-y-1">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+            View site
+          </a>
           <button
             onClick={() => setConfirmOpen(true)}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-400 border border-red-900/40 hover:text-red-300 hover:bg-red-950/30 transition-colors"
