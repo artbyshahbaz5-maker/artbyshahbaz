@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, description, price, image_url, category_id, gallery_urls, is_featured, is_active, sort_order } = body;
+    const { name, description, image_url, category_id, gallery_urls, is_featured, is_active, sort_order } = body;
 
     if (!name || !image_url) {
       return NextResponse.json({ success: false, message: "Name and image_url are required." }, { status: 400 });
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const slug = slugify(name) + "-" + Date.now().toString(36);
 
     const { data, error } = await supabase.from("products").insert([{
-      name, slug, description, price, image_url, category_id: category_id || null,
+      name, slug, description, image_url, category_id: category_id || null,
       gallery_urls: gallery_urls || [], is_featured: is_featured ?? false,
       is_active: is_active ?? true, sort_order: sort_order ?? 0,
     }]).select().single();

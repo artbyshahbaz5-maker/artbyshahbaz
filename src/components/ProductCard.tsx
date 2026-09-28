@@ -1,8 +1,8 @@
 import Link from "next/link";
+import { Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductCardGallery } from "@/components/ProductCardGallery";
-import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
 
 const PLACEHOLDER_IMAGE =
@@ -13,11 +13,17 @@ interface ProductCardProps {
   whatsappPhone?: string;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, whatsappPhone = "923001234567" }: ProductCardProps) {
   const images = [product.image_url, ...(product.gallery_urls ?? [])]
     .map((u) => (u ?? "").trim())
     .filter(Boolean);
   if (images.length === 0) images.push(PLACEHOLDER_IMAGE);
+
+  const phone = (whatsappPhone || "923001234567").replace(/[^0-9]/g, "");
+  const waMessage = encodeURIComponent(
+    `Hello Art By Shahbaz! ✨\n\nI'm interested in ordering/inquiring about:\n👗 *Outfit:* ${product.name}\n\nPlease let me know about availability and custom fitting.`
+  );
+  const waUrl = `https://wa.me/${phone}?text=${waMessage}`;
 
   return (
     <div className="group relative bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
@@ -51,15 +57,21 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.name}
         </Link>
         <div className="flex items-center justify-between gap-2 mt-3">
-          <span className="text-sm font-semibold text-foreground">
-            {formatPrice(product.price || "")}
-          </span>
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-sm transition-all duration-200 hover:scale-105 active:scale-95"
+            aria-label={`Call now on WhatsApp about ${product.name}`}
+          >
+            <Phone className="h-3 w-3" />
+            <span>Call Now</span>
+          </a>
           <AddToCartButton
             product={{
               id: product.id,
               name: product.name,
               slug: product.slug,
-              price: product.price || "",
               image_url: product.image_url,
             }}
             size="sm"

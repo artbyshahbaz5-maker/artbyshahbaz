@@ -14,7 +14,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Whitelist real columns — reject nested relations (e.g. `categories`) and
     // read-only fields (`id`, `slug`, `created_at`) that would fail the update.
     const ALLOWED = [
-      "name", "description", "price", "image_url", "category_id",
+      "name", "description", "image_url", "category_id",
       "gallery_urls", "is_featured", "is_active", "sort_order",
     ] as const;
     const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };

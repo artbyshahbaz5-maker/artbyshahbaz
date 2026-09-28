@@ -35,7 +35,6 @@ export function getLocalFallbackData(): SiteData {
           id: p.id || String(Math.random()),
           name: p.name || p.title || "Bridal Outfit",
           slug: p.slug || (p.name ? p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : `outfit-${p.id}`),
-          price: p.price || "Price on Request",
           description: p.description || "",
           image_url: p.image || p.image_url || "/placeholder-dress.jpg",
           category_id: p.category_id || p.category || "",
@@ -152,7 +151,10 @@ async function fetchProducts(
   }
 
   return (res.data ?? []).map((row: Record<string, unknown>) => {
-    const { categories, ...rest } = row as { categories?: { name?: string } | null };
+    const { categories, price: _price, ...rest } = row as {
+      categories?: { name?: string } | null;
+      price?: unknown;
+    };
     return {
       ...(rest as unknown as Product),
       category_name:

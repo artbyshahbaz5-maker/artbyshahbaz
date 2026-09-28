@@ -103,7 +103,6 @@ export function CartDrawer({ phone }: { phone: string }) {
                       >
                         {item.name}
                       </Link>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{item.price}</p>
 
                       <div className="mt-auto flex items-center justify-between pt-2">
                         <div className="flex items-center rounded-full border border-border">

@@ -2,7 +2,6 @@ import { getFullSiteData } from "@/lib/data-store";
 import { ProductCard } from "@/components/ProductCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
-import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -99,43 +98,34 @@ export default async function ProductDetailPage({
             {product.name}
           </h1>
 
-          <div className="text-2xl font-bold text-gold-600 mb-6">
-            {formatPrice(product.price || "")}
-          </div>
-
           <div className="prose prose-sm text-muted-foreground mb-8 leading-relaxed">
             <p>{product.description || "Handcrafted with supreme care and attention to detail. Available for bespoke sizing and custom bridal fitting at our Clifton, Karachi atelier."}</p>
           </div>
 
           <div className="p-6 bg-bridal-cream/60 border border-gold-200/60 rounded-2xl mb-8 space-y-4">
             <h3 className="font-semibold text-sm text-foreground uppercase tracking-wider">
-              ✨ Add to Cart & Inquiries
+              ✨ Interested in this outfit?
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Add this outfit to your cart and check out on WhatsApp, or message us directly for sizing, custom embroidery requests, or visiting our boutique.
+              Call us on WhatsApp to check availability, discuss custom fitting, or ask about this outfit.
             </p>
+            <WhatsAppButton
+              productName={product.name}
+              phoneNumber={phone}
+              size="lg"
+              className="w-full justify-center"
+              buttonText="Call Now on WhatsApp"
+            />
             <AddToCartButton
               product={{
                 id: product.id,
                 name: product.name,
                 slug: product.slug,
-                price: product.price || "",
                 image_url: product.image_url,
               }}
               size="lg"
               withQuantity
-            />
-            <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground">
-              <span className="h-px flex-1 bg-border" />
-              or
-              <span className="h-px flex-1 bg-border" />
-            </div>
-            <WhatsAppButton
-              productName={product.name}
-              price={product.price}
-              phoneNumber={phone}
-              size="lg"
-              className="w-full justify-center"
+              className="w-full"
             />
           </div>
 

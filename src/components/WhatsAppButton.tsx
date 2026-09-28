@@ -5,20 +5,20 @@ import { cn } from "@/lib/utils";
 
 interface WhatsAppButtonProps {
   productName: string;
-  price?: string;
   productUrl?: string;
   phoneNumber?: string;
   className?: string;
   size?: "sm" | "default" | "lg";
+  buttonText?: string;
 }
 
 export function WhatsAppButton({
   productName,
-  price,
   productUrl,
   phoneNumber = "923001234567",
   className,
   size = "default",
+  buttonText,
 }: WhatsAppButtonProps) {
   const handleOrder = () => {
     const phone = phoneNumber.replace(/[^0-9]/g, "");
@@ -32,7 +32,6 @@ export function WhatsAppButton({
       `I'm interested in ordering/inquiring about:`,
       `👗 *Outfit:* ${productName}`,
     ];
-    if (price) lines.push(`💰 *Price:* ${price}`);
     lines.push(`🔗 *Link:* ${currentUrl}`);
     lines.push("", "Please let me know about availability and custom fitting.");
 
@@ -53,7 +52,7 @@ export function WhatsAppButton({
       )}
     >
       <MessageCircle className={cn(size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5")} />
-      {size === "sm" ? "Order" : "Order via WhatsApp"}
+      {buttonText || (size === "sm" ? "Order" : "Order via WhatsApp")}
     </button>
   );
 }

@@ -13,7 +13,6 @@ export interface Product {
   name: string;
   slug: string;
   description?: string;
-  price?: string;
   image_url: string;
   gallery_urls?: string[];
   is_featured?: boolean;

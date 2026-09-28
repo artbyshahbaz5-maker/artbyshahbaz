@@ -13,7 +13,7 @@ import { Plus, Pencil, Trash2, Upload, Loader2, Search } from "lucide-react";
 import type { Product, Category } from "@/types";
 
 const EMPTY: Partial<Product> = {
-  name: "", description: "", price: "", image_url: "", gallery_urls: [],
+  name: "", description: "", image_url: "", gallery_urls: [],
   category_id: "", is_featured: false, is_active: true, sort_order: 0,
 };
 
@@ -108,7 +108,6 @@ export default function AdminProductsPage() {
     const payload = {
       name: editing.name.trim(),
       description: editing.description ?? "",
-      price: editing.price ?? "",
       image_url: editing.image_url,
       category_id: editing.category_id || null,
       gallery_urls: editing.gallery_urls ?? [],
@@ -192,8 +191,7 @@ export default function AdminProductsPage() {
                 </div>
               )}
               <div className="p-4">
-                <p className="text-white text-sm font-medium line-clamp-2 mb-1">{p.name}</p>
-                <p className="text-gold-400 text-xs mb-3">{p.price}</p>
+                <p className="text-white text-sm font-medium line-clamp-2 mb-3">{p.name}</p>
                 <div className="flex gap-2">
                   <Button size="sm" variant="adminSecondary" onClick={() => openEdit(p)} className="flex-1 text-xs gap-1.5">
                     <Pencil className="h-3 w-3" /> Edit
@@ -220,10 +218,6 @@ export default function AdminProductsPage() {
             <div className="space-y-1.5">
               <Label className="text-neutral-300">Product Name *</Label>
               <Input value={editing.name || ""} onChange={(e) => setEditing((p) => ({ ...p, name: e.target.value }))} className="bg-neutral-800 border-neutral-700 text-white" placeholder="e.g. Crimson Bridal Lehenga" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-neutral-300">Price</Label>
-              <Input value={editing.price || ""} onChange={(e) => setEditing((p) => ({ ...p, price: e.target.value }))} className="bg-neutral-800 border-neutral-700 text-white" placeholder="e.g. PKR 45,000" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-neutral-300">Category</Label>

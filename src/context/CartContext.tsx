@@ -15,12 +15,11 @@ export interface CartItem {
   id: string;
   name: string;
   slug: string;
-  price: string;
   image_url: string;
   qty: number;
 }
 
-type AddableProduct = Pick<Product, "id" | "name" | "slug" | "price" | "image_url">;
+type AddableProduct = Pick<Product, "id" | "name" | "slug" | "image_url">;
 
 interface CartContextValue {
   items: CartItem[];
@@ -64,7 +63,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (Array.isArray(parsed)) {
           setItems(
             parsed.filter(isValidItem).map((i) => ({
-              ...i,
+              id: i.id,
+              name: i.name,
+              slug: i.slug,
+              image_url: typeof i.image_url === "string" ? i.image_url : "",
               qty: Math.min(Math.max(1, Math.round(i.qty)), MAX_QTY),
             }))
           );
@@ -103,7 +105,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
           id: product.id,
           name: product.name,
           slug: product.slug,
-          price: product.price?.trim() || "Price on Request",
           image_url: product.image_url || "",
           qty: add,
         },

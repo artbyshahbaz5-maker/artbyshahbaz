@@ -7,7 +7,7 @@ import { useCart } from "@/context/CartContext";
 import type { Product } from "@/types";
 
 interface AddToCartButtonProps {
-  product: Pick<Product, "id" | "name" | "slug" | "price" | "image_url">;
+  product: Pick<Product, "id" | "name" | "slug" | "image_url">;
   size?: "sm" | "default" | "lg";
   className?: string;
   withQuantity?: boolean;

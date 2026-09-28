@@ -17,9 +17,7 @@ function buildWhatsAppUrl(items: CartItem[], phone: string, name: string, custom
   const lines = [
     "Hello Art By Shahbaz! ✨ I'd like to place an order:",
     "",
-    ...items.map(
-      (it, i) => `${i + 1}. ${it.name} — ${it.price} (x${it.qty})`
-    ),
+    ...items.map((it, i) => `${i + 1}. ${it.name} (x${it.qty})`),
     "",
     `Name: ${name.trim()}`,
     `Phone: ${customerPhone.trim()}`,
@@ -110,7 +108,6 @@ export function CheckoutForm({ items, phone, onBack, onSent }: CheckoutFormProps
                 <span className="truncate">
                   {it.name} <span className="text-muted-foreground">x{it.qty}</span>
                 </span>
-                <span className="whitespace-nowrap">{it.price}</span>
               </li>
             ))}
           </ul>
